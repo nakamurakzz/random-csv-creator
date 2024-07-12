@@ -13,11 +13,12 @@ CSV Generator is a command-line tool for generating CSV files with random data b
 This project is written in Go. Follow these steps to install the necessary dependencies:
 
 1. Install Go (https://golang.org/doc/install)
-2. Install the Cobra library:
+2. Install libraries:
 
 ```bash
-go get -u github.com/spf13/cobra@latest
+go mod tidy
 ```
+
 
 ## Usage
 
