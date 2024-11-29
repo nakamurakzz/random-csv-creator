@@ -10,6 +10,7 @@ import (
 	"strconv"
 
 	"github.com/spf13/cobra"
+	"golang.org/x/sync/errgroup"
 )
 
 const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
@@ -93,11 +94,18 @@ var rootCmd = &cobra.Command{
 		numColumns, _ := cmd.Flags().GetInt("num-columns")
 		numFiles, _ := cmd.Flags().GetInt("num-files")
 
+		eg, _ := errgroup.WithContext(cmd.Context())
+		eg.SetLimit(10)
+
 		for fileIndex := 1; fileIndex <= numFiles; fileIndex++ {
 			outputFile := fmt.Sprintf("%s_%d.csv", fileNamePrefix, fileIndex)
-			if err := createCSVFile(dir, outputFile, fileSize, numColumns); err != nil {
-				fmt.Println(err)
-				return
+			eg.Go(func() error {
+				return createCSVFile(dir, outputFile, fileSize, numColumns)
+			})
+
+			if err := eg.Wait(); err != nil {
+				fmt.Println("Error creating CSV file:", err)
+				os.Exit(1)
 			}
 		}
 	},
